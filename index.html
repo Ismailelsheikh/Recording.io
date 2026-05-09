@@ -1,815 +1,116 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>مسجّل الصوت الذكي</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --card: #1c1c28;
-    --border: #2a2a3d;
-    --accent: #6c63ff;
-    --accent2: #ff6584;
-    --accent3: #43e97b;
-    --text: #e8e8f0;
-    --muted: #666680;
-    --recording: #ff4757;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: 
-      radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.06) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 24px 16px 40px;
-    position: relative;
-    z-index: 1;
-  }
-
-  header {
-    text-align: center;
-    margin-bottom: 32px;
-    padding-top: 16px;
-  }
-
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
-  }
-
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 4px 20px rgba(108,99,255,0.4);
-  }
-
-  h1 {
-    font-size: 22px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .subtitle {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  .recorder-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 28px;
-    margin-bottom: 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .recorder-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.5;
-  }
-
-  .waveform {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    height: 60px;
-    margin-bottom: 24px;
-  }
-
-  .bar {
-    width: 3px;
-    border-radius: 3px;
-    background: var(--border);
-    height: 6px;
-    transition: height 0.1s ease, background 0.3s;
-  }
-
-  .recording .bar {
-    background: linear-gradient(180deg, var(--accent2), var(--accent));
-    animation: wave 0.8s ease-in-out infinite alternate;
-  }
-
-  @keyframes wave {
-    0% { height: 6px; }
-    100% { height: var(--h, 40px); }
-  }
-
-  .bar:nth-child(1)  { --h: 20px; animation-delay: 0.0s; }
-  .bar:nth-child(2)  { --h: 35px; animation-delay: 0.1s; }
-  .bar:nth-child(3)  { --h: 50px; animation-delay: 0.2s; }
-  .bar:nth-child(4)  { --h: 30px; animation-delay: 0.05s; }
-  .bar:nth-child(5)  { --h: 45px; animation-delay: 0.15s; }
-  .bar:nth-child(6)  { --h: 55px; animation-delay: 0.25s; }
-  .bar:nth-child(7)  { --h: 38px; animation-delay: 0.08s; }
-  .bar:nth-child(8)  { --h: 22px; animation-delay: 0.18s; }
-  .bar:nth-child(9)  { --h: 48px; animation-delay: 0.12s; }
-  .bar:nth-child(10) { --h: 32px; animation-delay: 0.22s; }
-  .bar:nth-child(11) { --h: 42px; animation-delay: 0.07s; }
-  .bar:nth-child(12) { --h: 28px; animation-delay: 0.17s; }
-  .bar:nth-child(13) { --h: 52px; animation-delay: 0.27s; }
-  .bar:nth-child(14) { --h: 18px; animation-delay: 0.03s; }
-  .bar:nth-child(15) { --h: 36px; animation-delay: 0.13s; }
-  .bar:nth-child(16) { --h: 44px; animation-delay: 0.23s; }
-  .bar:nth-child(17) { --h: 26px; animation-delay: 0.09s; }
-  .bar:nth-child(18) { --h: 58px; animation-delay: 0.19s; }
-  .bar:nth-child(19) { --h: 34px; animation-delay: 0.29s; }
-  .bar:nth-child(20) { --h: 16px; animation-delay: 0.04s; }
-
-  .timer {
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    color: #fff;
-    margin-bottom: 8px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .status-text {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 28px;
-    min-height: 18px;
-  }
-
-  .status-text.recording { color: var(--recording); }
-
-  .record-btn-wrap {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 16px;
-  }
-
-  .record-btn-wrap.active::before {
-    content: '';
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px solid var(--recording);
-    animation: pulse-ring 1.5s ease-out infinite;
-  }
-
-  @keyframes pulse-ring {
-    0% { transform: scale(0.85); opacity: 1; }
-    100% { transform: scale(1.3); opacity: 0; }
-  }
-
-  .record-btn {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    box-shadow: 0 8px 32px rgba(108,99,255,0.4);
-    position: relative;
-    z-index: 1;
-  }
-
-  .record-btn.recording {
-    background: linear-gradient(135deg, #ff4757, #ff6b81);
-    box-shadow: 0 8px 32px rgba(255,71,87,0.5);
-  }
-
-  .record-btn:active { transform: scale(0.93); }
-
-  .controls-row {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 8px;
-  }
-
-  .ctrl-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 20px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .ctrl-btn:active { transform: scale(0.96); }
-
-  .upload-zone {
-    background: var(--card);
-    border: 2px dashed var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-bottom: 20px;
-  }
-
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--accent);
-    background: rgba(108,99,255,0.05);
-  }
-
-  .upload-icon { font-size: 28px; margin-bottom: 8px; }
-  .upload-text { font-size: 14px; color: var(--muted); }
-  .upload-text strong { color: var(--accent); }
-
-  #fileInput { display: none; }
-
-  .lang-select-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .lang-label { font-size: 13px; color: var(--muted); }
-
-  .lang-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 14px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    outline: none;
-  }
-
-  .transcribe-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent), #8b5cf6);
-    border: none;
-    border-radius: 16px;
-    padding: 18px;
-    color: #fff;
-    font-family: 'Cairo', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 24px rgba(108,99,255,0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .transcribe-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .transcribe-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(108,99,255,0.5); }
-  .transcribe-btn:active { transform: translateY(0); }
-
-  .loading {
-    display: none;
-    text-align: center;
-    padding: 24px;
-    background: var(--card);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border);
-  }
-
-  .loading.visible { display: block; }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading p { font-size: 14px; color: var(--muted); }
-
-  .result-card {
-    display: none;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .result-card.visible { display: block; }
-
-  .result-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent3), var(--accent));
-  }
-
-  .result-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
-  .result-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .copy-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 12px;
-    color: var(--muted);
-    font-family: 'Cairo', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  .result-text {
-    font-size: 15px;
-    line-height: 1.9;
-    color: var(--text);
-    direction: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  .result-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-
-  .action-btn {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px;
-    color: var(--muted);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .action-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  .error-msg {
-    display: none;
-    background: rgba(255,71,87,0.1);
-    border: 1px solid rgba(255,71,87,0.3);
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-size: 13px;
-    color: #ff6b81;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-
-  .error-msg.visible { display: block; }
-
-  footer {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 12px;
-  }
-
-  footer span { color: var(--accent); }
-
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--accent3);
-    color: #0a0a0f;
-    padding: 10px 22px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 700;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 100;
-    white-space: nowrap;
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحويل الصوت إلى نص</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: 0.3s;
+            margin: 10px;
+        }
+        #start-btn { background-color: #28a745; }
+        #stop-btn { background-color: #dc3545; }
+        button:disabled { background-color: #ccc; }
+        
+        #result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            min-height: 100px;
+            border-radius: 10px;
+            background: #fafafa;
+            word-wrap: break-word;
+        }
+        .status { color: #555; font-size: 14px; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🎙️</div>
-      <h1>مسجّل الصوت الذكي</h1>
-    </div>
-    <p class="subtitle">سجّل أو ارفع صوتك — هنحوّله لنص فوراً</p>
-  </header>
+    <h2>مسجل الصوت الذكي</h2>
+    <p class="status" id="status">اضغط على "بدء التسجيل" للتحدث</p>
+    
+    <button id="start-btn">بدء التسجيل</button>
+    <button id="stop-btn" disabled>إيقاف</button>
 
-  <div class="recorder-card" id="recorderCard">
-    <div class="waveform" id="waveform">
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      <div class="bar"></div><div class="bar"></div>
-    </div>
-    <div class="timer" id="timer">00:00</div>
-    <div class="status-text" id="statusText">اضغط للتسجيل</div>
-
-    <div class="record-btn-wrap" id="recordBtnWrap">
-      <button class="record-btn" id="recordBtn" onclick="toggleRecord()">🎙️</button>
-    </div>
-
-    <div class="controls-row">
-      <button class="ctrl-btn" id="stopBtn" onclick="stopRecording()" disabled>⏹ إيقاف</button>
-      <button class="ctrl-btn" id="clearBtn" onclick="clearRecording()" disabled>🗑 مسح</button>
-    </div>
-  </div>
-
-  <div class="upload-zone" onclick="document.getElementById('fileInput').click()" 
-       ondragover="event.preventDefault();this.classList.add('drag-over')"
-       ondragleave="this.classList.remove('drag-over')"
-       ondrop="handleDrop(event)">
-    <div class="upload-icon">📂</div>
-    <div class="upload-text">أو <strong>ارفع ملف صوتي</strong><br>MP3, WAV, M4A, OGG, WebM</div>
-    <input type="file" id="fileInput" accept="audio/*" onchange="handleFileUpload(event)">
-  </div>
-
-  <div class="lang-select-wrap">
-    <span class="lang-label">🌍 اختار اللغة</span>
-    <select class="lang-select" id="langSelect">
-      <option value="ar">العربية 🇪🇬</option>
-      <option value="en">English 🇺🇸</option>
-      <option value="fr">Français 🇫🇷</option>
-      <option value="de">Deutsch 🇩🇪</option>
-      <option value="es">Español 🇪🇸</option>
-      <option value="auto">تلقائي 🤖</option>
-    </select>
-  </div>
-
-  <button class="transcribe-btn" id="transcribeBtn" onclick="transcribeAudio()" disabled>
-    ✨ حوّل للنص الآن
-  </button>
-
-  <div class="error-msg" id="errorMsg"></div>
-
-  <div class="loading" id="loadingSection">
-    <div class="spinner"></div>
-    <p>Claude بيحلل الصوت...</p>
-  </div>
-
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <div class="result-title">✅ النص المحوّل</div>
-      <button class="copy-btn" onclick="copyText()">📋 نسخ</button>
-    </div>
-    <div class="result-text" id="resultText"></div>
-    <div class="result-actions">
-      <button class="action-btn" onclick="downloadText()">⬇️ تحميل .txt</button>
-      <button class="action-btn" onclick="shareText()">📤 مشاركة</button>
-      <button class="action-btn" onclick="clearAll()">🔄 جديد</button>
-    </div>
-  </div>
-
-  <footer>
-    مجاني ١٠٠٪ • مشغّل بـ <span>Claude AI</span> • الصوت لا يُحفظ
-  </footer>
+    <div id="result-box">النص هيظهر هنا...</div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-let mediaRecorder = null;
-let audioChunks = [];
-let recordingTimer = null;
-let seconds = 0;
-let audioBlob = null;
-let isRecording = false;
-
-function updateTimer() {
-  seconds++;
-  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-  document.getElementById('timer').textContent = `${m}:${s}`;
-}
-
-async function toggleRecord() {
-  if (isRecording) { stopRecording(); } else { await startRecording(); }
-}
-
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioChunks = [];
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-      ? 'audio/webm;codecs=opus' 
-      : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/webm';
-
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      audioBlob = new Blob(audioChunks, { type: mimeType });
-      stream.getTracks().forEach(t => t.stop());
-      document.getElementById('transcribeBtn').disabled = false;
-      document.getElementById('statusText').textContent = '✅ التسجيل جاهز للتحويل';
-      document.getElementById('statusText').className = 'status-text';
-    };
-
-    mediaRecorder.start(250);
-    isRecording = true;
-    seconds = 0;
-    recordingTimer = setInterval(updateTimer, 1000);
-
-    const btn = document.getElementById('recordBtn');
-    btn.textContent = '⏸';
-    btn.classList.add('recording');
-    document.getElementById('recordBtnWrap').classList.add('active');
-    document.getElementById('waveform').classList.add('recording');
-    document.getElementById('statusText').textContent = '🔴 جاري التسجيل...';
-    document.getElementById('statusText').className = 'status-text recording';
-    document.getElementById('stopBtn').disabled = false;
-    document.getElementById('clearBtn').disabled = false;
-    hideError();
-  } catch (err) {
-    showError('⚠️ محتاج تسمح بالوصول للمايك في الإعدادات');
-  }
-}
-
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-    clearInterval(recordingTimer);
-    isRecording = false;
-    const btn = document.getElementById('recordBtn');
-    btn.textContent = '🎙️';
-    btn.classList.remove('recording');
-    document.getElementById('recordBtnWrap').classList.remove('active');
-    document.getElementById('waveform').classList.remove('recording');
-    document.getElementById('stopBtn').disabled = true;
-  }
-}
-
-function clearRecording() {
-  audioBlob = null;
-  seconds = 0;
-  document.getElementById('timer').textContent = '00:00';
-  document.getElementById('statusText').textContent = 'اضغط للتسجيل';
-  document.getElementById('statusText').className = 'status-text';
-  document.getElementById('transcribeBtn').disabled = true;
-  document.getElementById('clearBtn').disabled = true;
-  document.getElementById('stopBtn').disabled = true;
-  hideResult(); hideError();
-}
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  audioBlob = file;
-  document.getElementById('statusText').textContent = `📁 ${file.name}`;
-  document.getElementById('transcribeBtn').disabled = false;
-  hideError();
-  showToast('تم رفع الملف ✅');
-}
-
-function handleDrop(event) {
-  event.preventDefault();
-  event.currentTarget.classList.remove('drag-over');
-  const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('audio/')) {
-    audioBlob = file;
-    document.getElementById('statusText').textContent = `📁 ${file.name}`;
-    document.getElementById('transcribeBtn').disabled = false;
-    showToast('تم رفع الملف ✅');
-  }
-}
-
-async function transcribeAudio() {
-  if (!audioBlob) return;
-  const lang = document.getElementById('langSelect').value;
-  const langNames = { ar: 'العربية', en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', auto: 'تلقائي' };
-
-  showLoading(); hideResult(); hideError();
-  document.getElementById('transcribeBtn').disabled = true;
-
-  try {
-    const base64Audio = await blobToBase64(audioBlob);
-    const base64Data = base64Audio.split(',')[1];
-    const mimeType = audioBlob.type || 'audio/webm';
-    const langInstruction = lang === 'auto' 
-      ? 'Detect the language automatically and transcribe accordingly.'
-      : `The audio is in ${langNames[lang]}. Transcribe in that language.`;
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "text", text: `You are an expert audio transcription assistant. ${langInstruction} Please transcribe the following audio accurately. Preserve punctuation and paragraph breaks. If unclear, note with [غير واضح]. Return ONLY the transcribed text.` },
-            { type: "document", source: { type: "base64", media_type: mimeType, data: base64Data } }
-          ]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      if (err.error?.message?.includes('document') || err.error?.message?.includes('audio')) {
-        await transcribeViaSpeechAPI(lang);
-        return;
-      }
-      throw new Error(err.error?.message || 'خطأ في الاتصال');
-    }
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text;
-    if (text) { showResult(text); } else { throw new Error('مفيش نص رجع من الـ AI'); }
-
-  } catch (err) {
-    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
-      await transcribeViaSpeechAPI(lang);
-    } else {
-      showError(`❌ ${err.message || 'حصل خطأ، جرب تاني'}`);
-    }
-  } finally {
-    hideLoading();
-    document.getElementById('transcribeBtn').disabled = false;
-  }
-}
-
-function transcribeViaSpeechAPI(lang) {
-  return new Promise((resolve, reject) => {
+    // التأكد من دعم المتصفح للخاصية
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { reject(new Error('المتصفح مش بيدعم التحويل الصوتي')); return; }
+    
+    if (!SpeechRecognition) {
+        alert("للأسف متصفحك لا يدعم خاصية التعرف على الصوت. جرب Google Chrome.");
+    } else {
+        const recognition = new SpeechRecognition();
+        
+        // إعدادات اللغة (تقدر تغيرها لـ 'en-US' لو عايز إنجليزي)
+        recognition.lang = 'ar-SA'; 
+        recognition.continuous = true; // يفضل شغال حتى لو سكت شوية
+        recognition.interimResults = true; // يظهر النص أثناء الكلام
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = lang === 'auto' ? 'ar-EG' : lang === 'ar' ? 'ar-EG' : lang === 'en' ? 'en-US' : lang === 'fr' ? 'fr-FR' : lang === 'de' ? 'de-DE' : 'es-ES';
-    recognition.continuous = true;
-    recognition.interimResults = false;
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resultBox = document.getElementById('result-box');
+        const statusText = document.getElementById('status');
 
-    let fullText = '';
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
+        startBtn.onclick = () => {
+            recognition.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            statusText.innerText = "جاري الاستماع... اتكلم دلوقتي";
+            statusText.style.color = "red";
+        };
 
-    recognition.onresult = (event) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) fullText += event.results[i][0].transcript + ' ';
-      }
-    };
-    recognition.onerror = () => {
-      audio.pause();
-      if (fullText.trim()) { showResult(fullText.trim()); resolve(); }
-      else { reject(new Error('تعذّر التحويل')); }
-    };
-    recognition.onend = () => {
-      audio.pause();
-      if (fullText.trim()) { showResult(fullText.trim()); }
-      else { showError('⚠️ مفيش كلام واضح في التسجيل'); }
-      resolve();
-    };
+        stopBtn.onclick = () => {
+            recognition.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusText.innerText = "تم إيقاف التسجيل";
+            statusText.style.color = "#555";
+        };
 
-    recognition.start();
-    audio.play().catch(() => { recognition.stop(); reject(new Error('تعذّر تشغيل الصوت')); });
-    audio.onended = () => setTimeout(() => recognition.stop(), 1500);
-  });
-}
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            resultBox.innerText = transcript;
+        };
 
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-function showResult(text) {
-  document.getElementById('resultText').textContent = text;
-  document.getElementById('resultCard').classList.add('visible');
-  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function hideResult() { document.getElementById('resultCard').classList.remove('visible'); }
-function showLoading() { document.getElementById('loadingSection').classList.add('visible'); }
-function hideLoading() { document.getElementById('loadingSection').classList.remove('visible'); }
-function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.classList.add('visible'); }
-function hideError() { document.getElementById('errorMsg').classList.remove('visible'); }
-
-function copyText() {
-  navigator.clipboard.writeText(document.getElementById('resultText').textContent).then(() => showToast('تم النسخ ✅'));
-}
-
-function downloadText() {
-  const blob = new Blob([document.getElementById('resultText').textContent], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'transcription.txt';
-  a.click();
-  showToast('تم التحميل ✅');
-}
-
-async function shareText() {
-  const text = document.getElementById('resultText').textContent;
-  if (navigator.share) { await navigator.share({ text }); } else { copyText(); }
-}
-
-function clearAll() {
-  clearRecording(); hideResult(); hideError();
-  document.getElementById('fileInput').value = '';
-  showToast('تم المسح 🔄');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
+        recognition.onerror = (event) => {
+            console.error("خطأ:", event.error);
+            statusText.innerText = "حصل خطأ: " + event.error;
+        };
+    }
 </script>
+
 </body>
 </html>
